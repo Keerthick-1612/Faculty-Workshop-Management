@@ -16,6 +16,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+app.use('/', express.static(path.join(__dirname, 'public')))
+app.use('/files', express.static(path.join(__dirname, 'files')));
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+
+
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'postgres',
+    password: process.env.DB_PASSWORD,
+    port: 5432
+});
+
+
 app.get('/input_attended', (req, res) => {
     res.sendFile(path.join(__dirname, 'input_attended.html'));
 });
@@ -78,22 +94,6 @@ app.post('/input_invited', upload.single('file'), (req, res) => {
             res.status(200).send('Data inserted successfully');
         }
     });
-});
-
-
-app.use('/', express.static(path.join(__dirname, 'public')))
-app.use('/files', express.static(path.join(__dirname, 'files')));
-app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use('/public', express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true }));
-
-
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: process.env.DB_PASSWORD,
-    port: 5432
 });
 
 
@@ -514,7 +514,7 @@ app.get('/data_consol', async (req, res) => {
     try {
         // sqlQuery = `SELECT type , COUNT(*) AS count FROM sdp_attended WHERE start_date >= $1 AND end_date <= $2 and type !='NULL' GROUP BY type `;
         // const result = await pool.query(sqlQuery, [startDate, endDate]);
-        sqlQuery=`select ac_year as type , count(*) as count from sdp_attended group by ac_year order by ac_year`;
+        sqlQuery = `select ac_year as type , count(*) as count from sdp_attended group by ac_year order by ac_year`;
         const result = await pool.query(sqlQuery)
 
         sqlQuery1 = `SELECT event as type, COUNT(*) AS count FROM sdp_organised WHERE start_date >= $1 AND end_date <= $2 and event !='NULL' GROUP BY event `;
@@ -554,10 +554,10 @@ app.get('/nba', async (req, res) => {
     }
 })
 
-const PORT = 3000;
+const PORT = 7777;
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port http://localhost:${PORT}`);
 });
 
 
